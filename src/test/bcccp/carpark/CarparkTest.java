@@ -7,6 +7,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 import bcccp.carpark.Carpark;
+import bcccp.carpark.Gate;
 import bcccp.tickets.adhoc.IAdhocTicket;
 import bcccp.tickets.adhoc.IAdhocTicketDAO;
 import bcccp.tickets.season.ISeasonTicketDAO;
@@ -76,5 +77,22 @@ public class CarparkTest {
 		// Should be full at this point.
 		carpark.recordAdhocTicketEntry();
 		assertTrue(carpark.isFull());
+	}
+	
+	@Test
+	public void IssueAdhocTicketWhenFull() {
+		Carpark carpark = new Carpark("Name", 1, this.adhocTicketMock_, this.seasonTicketMock_);
+		carpark.recordAdhocTicketEntry();
+		
+		// Carpark is now full. Should not issue ticket.
+		expectedException.expect(RuntimeException.class);
+		expectedException.expectMessage(containsString("full"));
+		IAdhocTicket ticket = carpark.issueAdhocTicket();
+		ticket.isCurrent();
+	}
+	
+	@Test
+	public void Issue() {
+		
 	}
 }
