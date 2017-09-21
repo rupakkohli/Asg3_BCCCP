@@ -28,10 +28,7 @@ public class ChargeCalculator {
 	
 	public ChargeCalculator(long entryDateTimeMillis, long exitDateTimeMillis) {
 		LocalDateTime entryDateTime = toLocalDateTime(entryDateTimeMillis);
-		LocalDateTime exitDateTime = toLocalDateTime(exitDateTimeMillis);
-		
-		
-		
+		LocalDateTime exitDateTime = toLocalDateTime(exitDateTimeMillis);	
 	}
 	
 	
