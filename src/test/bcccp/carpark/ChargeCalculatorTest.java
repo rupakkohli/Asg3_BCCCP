@@ -10,11 +10,14 @@ import org.junit.Test;
 import bcccp.carpark.ChargeCalculator;
 
 public class ChargeCalculatorTest {
+ 
+	// The allowable delta when comparing two doubles.
+	private static final double DELTA = 0.001;
 	
 	@Test
 	public void testOutOfHoursFullDay() {
 		double outOfHours = ChargeCalculator.calcDayCharge(LocalTime.MIDNIGHT, LocalTime.MIDNIGHT, DayOfWeek.SATURDAY);
-		assertEquals(outOfHours, 2 * 1440, 0.01);
+		assertEquals(outOfHours, 2 * 1440, DELTA);
 	}
 	
 	@Test
@@ -22,7 +25,13 @@ public class ChargeCalculatorTest {
 		// 4 minutes, rounding down
 		double outOfHours = ChargeCalculator.calcDayCharge(LocalTime.of(1, 10, 27), LocalTime.of(19, 15, 17), DayOfWeek.SATURDAY);
 		double minutesExpected = 18 * 60 + 4;
-		assertEquals(outOfHours, minutesExpected * 2 , 0.01);
+		assertEquals(outOfHours, minutesExpected * 2 , DELTA);
 	}
 	
+	@Test
+	public void testBeforeStartOfBusiness() {
+		double beforeStart = ChargeCalculator.calcDayCharge(LocalTime.of(1,0,0), LocalTime.of(6, 59, 59), DayOfWeek.MONDAY);
+		double minutes = 5 * 60 + 59;
+		assertEquals(beforeStart, minutes * 2, DELTA);
+	}
 }
