@@ -22,6 +22,9 @@ public class Carpark implements ICarpark {
 	public Carpark(String name, int capacity, 
 			IAdhocTicketDAO adhocTicketDAO, 
 			ISeasonTicketDAO seasonTicketDAO) {
+		
+		this.validateName(name);
+		this.validateCapacity(capacity);
 		this.carparkId = name;
 		this.capacity = capacity;
 		observers = new ArrayList<>();
@@ -44,6 +47,20 @@ public class Carpark implements ICarpark {
 	public void deregister(ICarparkObserver observer) {
 		if (observers.contains(observer)) {
 			observers.remove(observer);
+		}
+	}
+	
+	private void validateName(String name) {
+		if (name == null || name.trim().equals("")) {
+			throw new RuntimeException("The name was not correctly provided");
+		}
+	}
+	
+	
+	
+	private void validateCapacity(int capacity) {
+		if (capacity <= 0) {
+			throw new RuntimeException("The capacity should be a non-zero positive number.");
 		}
 	}
 	
