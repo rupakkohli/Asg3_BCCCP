@@ -26,25 +26,37 @@ public class ChargeCalculator {
 	
 	private static final double MINUTES_IN_DAY = 60 * 24;
 	
+	
+	
 	public ChargeCalculator(long entryDateTimeMillis, long exitDateTimeMillis) {
 		LocalDateTime entryDateTime = toLocalDateTime(entryDateTimeMillis);
 		LocalDateTime exitDateTime = toLocalDateTime(exitDateTimeMillis);	
 	}
 	
 	
+	
 	// Calculate the charge for a single day.
 	public static double calcDayCharge(LocalTime startTime, LocalTime endTime, DayOfWeek dayOfWeek) {
 		if (BUSINESS_DAYS.contains(dayOfWeek)) {
-			return 0;
+			return calcBusinessDayCharge(startTime, endTime);
 		}
 		else {
-			return getChargeForTimes(startTime, endTime, OUT_OF_HOURS_RATE);
+			return calcChargeBetweenTimes(startTime, endTime, OUT_OF_HOURS_RATE);
 		}
 	}
 	
 	
+	private static double calcBusinessDayCharge(LocalTime startTime, LocalTime endTime) {
+		if (endTime.isBefore(END_BUSINESS_TIME)) {
+			return calcChargeBetweenTimes(startTime, endTime, OUT_OF_HOURS_RATE);
+		}
+		
+		return 0;
+	}
 	
-	private static double getChargeForTimes(LocalTime startTime, LocalTime endTime, double charge) {
+	
+	
+	private static double calcChargeBetweenTimes(LocalTime startTime, LocalTime endTime, double charge) {
 		
 		// For the entire day
 		if (startTime.equals(LocalTime.MIDNIGHT) && endTime.equals(LocalTime.MIDNIGHT)) {
