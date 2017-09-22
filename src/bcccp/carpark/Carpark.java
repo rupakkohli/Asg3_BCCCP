@@ -18,12 +18,14 @@ public class Carpark implements ICarpark {
 	private int nParked;
 	private IAdhocTicketDAO adhocTicketDAO;
 	private ISeasonTicketDAO seasonTicketDAO;
+	private ITimeProvider timeProvider;
 	
 	
 	
 	public Carpark(String name, int capacity, 
 			IAdhocTicketDAO adhocTicketDAO, 
-			ISeasonTicketDAO seasonTicketDAO) {
+			ISeasonTicketDAO seasonTicketDAO,
+			ITimeProvider timeProvider) {
 		
 		this.validateName(name);
 		this.validateCapacity(capacity);
@@ -32,6 +34,7 @@ public class Carpark implements ICarpark {
 		observers = new ArrayList<>();
 		this.adhocTicketDAO = adhocTicketDAO;
 		this.seasonTicketDAO = seasonTicketDAO;
+		this.timeProvider = timeProvider;
 	}
 
 	
@@ -172,7 +175,7 @@ public class Carpark implements ICarpark {
 	
 	
 	private boolean isCurrentTimeBusinessHours() {
-		LocalTime currentDateTime = Utilities.toLocalDateTime(System.currentTimeMillis()).toLocalTime();
+		LocalTime currentDateTime = this.timeProvider.getLocalTime();
 		return Utilities.isTimeOnOrAfter(currentDateTime, Constants.START_BUSINESS_TIME)
 				&& Utilities.isTimeOnOrBefore(currentDateTime, Constants.END_BUSINESS_TIME);
 	}
