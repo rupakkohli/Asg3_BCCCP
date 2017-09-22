@@ -15,7 +15,7 @@ public class ChargeCalculator {
 	
 	private static final double BUSINESS_HOURS_RATE = 5.0;
 	
-	private static final LocalTime START_BUSINESS = LocalTime.of(7,  0);
+	private static final LocalTime START_BUSINESS_TIME = LocalTime.of(7,  0);
 	
 	private static final LocalTime END_BUSINESS_TIME = LocalTime.of(19, 0);
 	
@@ -37,26 +37,38 @@ public class ChargeCalculator {
 	
 	// Calculate the charge for a single day.
 	public static double calcDayCharge(LocalTime startTime, LocalTime endTime, DayOfWeek dayOfWeek) {	
-		if (BUSINESS_DAYS.contains(dayOfWeek)) {
-			return calcBusinessDayCharge(startTime, endTime);
+		
+		if (endTime.isBefore(startTime)) {
+			throw new RuntimeException("The end time should be after the start time.");
 		}
-		else {
-			return calcChargeBetweenTimes(startTime, endTime, OUT_OF_HOURS_RATE);
-		}
+		
+		return BUSINESS_DAYS.contains(dayOfWeek) ? calcBusinessDayCharge(startTime, endTime)
+					: calcChargeBetweenTimes(startTime, endTime, OUT_OF_HOURS_RATE);
 	}
 	
 	
 	
 	private static double calcBusinessDayCharge(LocalTime startTime, LocalTime endTime) {
-		if (endTime.isBefore(START_BUSINESS) || startTime.isAfter(END_BUSINESS_TIME)) {
+		
+		if (endTime.isBefore(START_BUSINESS_TIME) || startTime.isAfter(END_BUSINESS_TIME)) {
 			return calcChargeBetweenTimes(startTime, endTime, OUT_OF_HOURS_RATE);
 		}
 		
-		if (isTimeOnOrAfter(startTime, START_BUSINESS) && isTimeOnOrBefore(endTime, END_BUSINESS_TIME)) {
+		if (isTimeOnOrAfter(startTime, START_BUSINESS_TIME) && isTimeOnOrBefore(endTime, END_BUSINESS_TIME)) {
 			return calcChargeBetweenTimes(startTime, endTime, BUSINESS_HOURS_RATE);
 		}
 		
+		if (startTime.isBefore(START_BUSINESS_TIME) && isTimeOnOrBefore(endTime, END_BUSINESS_TIME)) {
+			double outOfHours = calcChargeBetweenTimes(startTime, START_BUSINESS_TIME, OUT_OF_HOURS_RATE);
+			double businessHours = calcChargeBetweenTimes(START_BUSINESS_TIME, endTime, BUSINESS_HOURS_RATE);
+			return outOfHours + businessHours;
+		}
 		
+		if (isTimeOnOrAfter(startTime, START_BUSINESS_TIME) && endTime.isAfter(END_BUSINESS_TIME)) {
+			double businessHours = calcChargeBetweenTimes(startTime, END_BUSINESS_TIME, BUSINESS_HOURS_RATE);
+			double outOfHours = calcChargeBetweenTimes(END_BUSINESS_TIME, endTime, OUT_OF_HOURS_RATE);
+			return businessHours + outOfHours;
+		}
 		
 		return 0;
 	}

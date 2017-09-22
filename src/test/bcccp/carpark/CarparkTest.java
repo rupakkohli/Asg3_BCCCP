@@ -7,7 +7,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 import bcccp.carpark.Carpark;
-import bcccp.carpark.Gate;
 import bcccp.tickets.adhoc.IAdhocTicket;
 import bcccp.tickets.adhoc.IAdhocTicketDAO;
 import bcccp.tickets.season.ISeasonTicketDAO;

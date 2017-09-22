@@ -5,14 +5,30 @@ import static org.junit.Assert.*;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
+import org.junit.Rule;
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import org.junit.rules.ExpectedException;
 
 import bcccp.carpark.ChargeCalculator;
 
 public class ChargeCalculatorTest {
+	
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
  
 	// The allowable delta when comparing two doubles.
 	private static final double DELTA = 0.001;
+	
+	
+	@Test
+	public void testIncorrectTimes() {
+		expectedException.expect(RuntimeException.class);
+		expectedException.expectMessage(containsString("end time"));
+		ChargeCalculator.calcDayCharge(LocalTime.of(3, 4), LocalTime.of(1, 2), DayOfWeek.SATURDAY);
+	}
+	
 	
 	@Test
 	public void testOutOfHoursFullDay() {
@@ -61,4 +77,27 @@ public class ChargeCalculatorTest {
 		double during = ChargeCalculator.calcDayCharge(LocalTime.of(8, 5, 19), LocalTime.of(14, 3, 27), DayOfWeek.MONDAY);
 		assertEquals((6 * 60 - 2) * 5, during, DELTA);
 	}
+	
+	
+	@Test
+	public void startBeforeEndBeforeBusiness() {
+		double startBefore = ChargeCalculator.calcDayCharge(LocalTime.of(6, 45, 59), LocalTime.of(18, 0, 0), DayOfWeek.MONDAY);
+		double outOfHours = 15 * 2;
+		double business = 11 * 60 * 5;
+		assertEquals(outOfHours + business, startBefore, DELTA);
+	}
+	
+	
+	
+	@Test
+	public void startAfterEndAfterBusiness() {
+		double startAfter = ChargeCalculator.calcDayCharge(LocalTime.of(7, 45, 32), LocalTime.of(20, 32, 19), DayOfWeek.MONDAY);
+		double outOfHours = (1 * 60 + 32) * 2;
+		double business = (11 * 60 + 15) * 5;
+		assertEquals(outOfHours + business, startAfter, DELTA);
+	}
+	
+	
+	
+	
 }
