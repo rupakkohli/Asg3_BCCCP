@@ -5,6 +5,8 @@ import java.awt.EventQueue;
 import bcccp.carpark.CarSensor;
 import bcccp.carpark.Carpark;
 import bcccp.carpark.Gate;
+import bcccp.carpark.ITimeProvider;
+import bcccp.carpark.TimeProvider;
 import bcccp.carpark.entry.EntryController;
 import bcccp.carpark.entry.EntryUI;
 import bcccp.carpark.exit.ExitController;
@@ -41,8 +43,9 @@ public class Main {
 					
 					IAdhocTicketDAO adhocTicketDAO = new AdhocTicketDAO(new AdhocTicketFactory());
 					ISeasonTicketDAO seasonTicketDAO = new SeasonTicketDAO(new UsageRecordFactory());
+					ITimeProvider timeProvider = new TimeProvider();
 					
-					Carpark carpark = new Carpark("Bathurst Chase", 5, adhocTicketDAO, seasonTicketDAO);
+					Carpark carpark = new Carpark("Bathurst Chase", 5, adhocTicketDAO, seasonTicketDAO, timeProvider);
 					
 					ISeasonTicket t1 = new SeasonTicket("S1111","Bathurst Chase", 0L, 0L);
 					ISeasonTicket t2 = new SeasonTicket("S2222","Bathurst Chase", 0L, 0L);

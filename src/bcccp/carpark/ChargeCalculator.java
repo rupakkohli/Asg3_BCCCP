@@ -2,13 +2,9 @@ package bcccp.carpark;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.List;
 
 public class ChargeCalculator{
 	
@@ -17,8 +13,8 @@ public class ChargeCalculator{
 	private LocalDateTime exitDateTime;
 	
 	public ChargeCalculator(long entryDateTimeMillis, long exitDateTimeMillis) {
-		LocalDateTime entryDateTime = toLocalDateTime(entryDateTimeMillis);
-		LocalDateTime exitDateTime = toLocalDateTime(exitDateTimeMillis);
+		LocalDateTime entryDateTime = Utilities.toLocalDateTime(entryDateTimeMillis);
+		LocalDateTime exitDateTime = Utilities.toLocalDateTime(exitDateTimeMillis);
 		if (exitDateTime.isBefore(entryDateTime)) {
 			throw new RuntimeException("The exit date time must be after the entry date time.");
 		}
@@ -85,17 +81,23 @@ public class ChargeCalculator{
 			return calcChargeBetweenTimes(startTime, endTime, Constants.AFTER_HOURS_RATE_PER_MIN);
 		}
 		
-		if (isTimeOnOrAfter(startTime, Constants.START_BUSINESS_TIME) && isTimeOnOrBefore(endTime, Constants.END_BUSINESS_TIME)) {
+		if (Utilities.isTimeOnOrAfter(startTime, Constants.START_BUSINESS_TIME) 
+				&& Utilities.isTimeOnOrBefore(endTime, Constants.END_BUSINESS_TIME)) {
+			
 			return calcChargeBetweenTimes(startTime, endTime, Constants.BUSINESS_HOURS_RATE_PER_MIN);
 		}
 		
-		if (startTime.isBefore(Constants.START_BUSINESS_TIME) && isTimeOnOrBefore(endTime, Constants.END_BUSINESS_TIME)) {
+		if (startTime.isBefore(Constants.START_BUSINESS_TIME) 
+				&& Utilities.isTimeOnOrBefore(endTime, Constants.END_BUSINESS_TIME)) {
+			
 			double outOfHours = calcChargeBetweenTimes(startTime, Constants.START_BUSINESS_TIME, Constants.AFTER_HOURS_RATE_PER_MIN);
 			double businessHours = calcChargeBetweenTimes(Constants.START_BUSINESS_TIME, endTime, Constants.BUSINESS_HOURS_RATE_PER_MIN);
 			return outOfHours + businessHours;
 		}
 		
-		if (isTimeOnOrAfter(startTime, Constants.START_BUSINESS_TIME) && endTime.isAfter(Constants.END_BUSINESS_TIME)) {
+		if (Utilities.isTimeOnOrAfter(startTime, Constants.START_BUSINESS_TIME) && 
+				endTime.isAfter(Constants.END_BUSINESS_TIME)) {
+			
 			double businessHours = calcChargeBetweenTimes(startTime, Constants.END_BUSINESS_TIME, Constants.BUSINESS_HOURS_RATE_PER_MIN);
 			double outOfHours = calcChargeBetweenTimes(Constants.END_BUSINESS_TIME, endTime, Constants.AFTER_HOURS_RATE_PER_MIN);
 			return businessHours + outOfHours;
@@ -106,19 +108,6 @@ public class ChargeCalculator{
 		double beforeHours = calcChargeBetweenTimes(startTime, Constants.START_BUSINESS_TIME, Constants.AFTER_HOURS_RATE_PER_MIN);
 		double afterHours = calcChargeBetweenTimes(Constants.END_BUSINESS_TIME, endTime, Constants.AFTER_HOURS_RATE_PER_MIN);
 		return beforeHours + businessHours + afterHours;
-	}
-	
-	
-	
-	private static boolean isTimeOnOrAfter(LocalTime first, LocalTime second) {
-		return first.equals(second) || first.isAfter(second);
-	}
-	
-	
-	
-	// Midnight is considered after a time.
-	private static boolean isTimeOnOrBefore(LocalTime first, LocalTime second) {
-		return first != LocalTime.MIDNIGHT && (first.equals(second) || first.isBefore(second));
 	}
 	
 	
@@ -146,14 +135,5 @@ public class ChargeCalculator{
 		}
 
 		return Duration.between(startTimeRounded, endTimeRounded).toMinutes();
-	}
-	
-	
-	
-	private static LocalDateTime toLocalDateTime(long millis) {
-		return Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDateTime();
-	}
-
-	
-	
+	}	
 }
