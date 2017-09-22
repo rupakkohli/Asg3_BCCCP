@@ -11,9 +11,11 @@ import java.util.List;
 
 public class ChargeCalculator {
 	
-	private static final double OUT_OF_HOURS_RATE = 2.0;
+	private static final double MIN_IN_HOUR = 60;
 	
-	private static final double BUSINESS_HOURS_RATE = 5.0;
+	private static final double AFTER_HOURS_RATE_PER_MIN = 2.0 / MIN_IN_HOUR;
+	
+	private static final double BUSINESS_HOURS_RATE_PER_MIN = 5.0 / MIN_IN_HOUR;
 	
 	private static final LocalTime START_BUSINESS_TIME = LocalTime.of(7,  0);
 	
@@ -38,42 +40,55 @@ public class ChargeCalculator {
 	// Calculate the charge for a single day.
 	public static double calcDayCharge(LocalTime startTime, LocalTime endTime, DayOfWeek dayOfWeek) {	
 		
-		if (endTime.isBefore(startTime)) {
+		if (!areTimesValid(startTime, endTime)) {
 			throw new RuntimeException("The end time should be after the start time.");
 		}
 		
 		return BUSINESS_DAYS.contains(dayOfWeek) ? calcBusinessDayCharge(startTime, endTime)
-					: calcChargeBetweenTimes(startTime, endTime, OUT_OF_HOURS_RATE);
+					: calcChargeBetweenTimes(startTime, endTime, AFTER_HOURS_RATE_PER_MIN);
+	}
+	
+	
+	// Check whether a start and end time are correct.
+	private static boolean areTimesValid(LocalTime startTime, LocalTime endTime) {
+		
+		// Whole day is correct.
+		// Any time until midnight is correct.
+		if (endTime.equals(LocalTime.MIDNIGHT)) {
+			return true;
+		}
+
+		return endTime.isAfter(startTime);
 	}
 	
 	
 	
 	private static double calcBusinessDayCharge(LocalTime startTime, LocalTime endTime) {
-		
-		if (endTime.isBefore(START_BUSINESS_TIME) || startTime.isAfter(END_BUSINESS_TIME)) {
-			return calcChargeBetweenTimes(startTime, endTime, OUT_OF_HOURS_RATE);
+				
+		if ((!endTime.equals(LocalTime.MIDNIGHT) && endTime.isBefore(START_BUSINESS_TIME)) || startTime.isAfter(END_BUSINESS_TIME)) {
+			return calcChargeBetweenTimes(startTime, endTime, AFTER_HOURS_RATE_PER_MIN);
 		}
 		
 		if (isTimeOnOrAfter(startTime, START_BUSINESS_TIME) && isTimeOnOrBefore(endTime, END_BUSINESS_TIME)) {
-			return calcChargeBetweenTimes(startTime, endTime, BUSINESS_HOURS_RATE);
+			return calcChargeBetweenTimes(startTime, endTime, BUSINESS_HOURS_RATE_PER_MIN);
 		}
 		
 		if (startTime.isBefore(START_BUSINESS_TIME) && isTimeOnOrBefore(endTime, END_BUSINESS_TIME)) {
-			double outOfHours = calcChargeBetweenTimes(startTime, START_BUSINESS_TIME, OUT_OF_HOURS_RATE);
-			double businessHours = calcChargeBetweenTimes(START_BUSINESS_TIME, endTime, BUSINESS_HOURS_RATE);
+			double outOfHours = calcChargeBetweenTimes(startTime, START_BUSINESS_TIME, AFTER_HOURS_RATE_PER_MIN);
+			double businessHours = calcChargeBetweenTimes(START_BUSINESS_TIME, endTime, BUSINESS_HOURS_RATE_PER_MIN);
 			return outOfHours + businessHours;
 		}
 		
 		if (isTimeOnOrAfter(startTime, START_BUSINESS_TIME) && endTime.isAfter(END_BUSINESS_TIME)) {
-			double businessHours = calcChargeBetweenTimes(startTime, END_BUSINESS_TIME, BUSINESS_HOURS_RATE);
-			double outOfHours = calcChargeBetweenTimes(END_BUSINESS_TIME, endTime, OUT_OF_HOURS_RATE);
+			double businessHours = calcChargeBetweenTimes(startTime, END_BUSINESS_TIME, BUSINESS_HOURS_RATE_PER_MIN);
+			double outOfHours = calcChargeBetweenTimes(END_BUSINESS_TIME, endTime, AFTER_HOURS_RATE_PER_MIN);
 			return businessHours + outOfHours;
 		}
 		
 		// Start time is before and end time after; general case
-		double businessHours = calcChargeBetweenTimes(START_BUSINESS_TIME, END_BUSINESS_TIME, BUSINESS_HOURS_RATE);
-		double beforeHours = calcChargeBetweenTimes(startTime, START_BUSINESS_TIME, OUT_OF_HOURS_RATE);
-		double afterHours = calcChargeBetweenTimes(END_BUSINESS_TIME, endTime, OUT_OF_HOURS_RATE);
+		double businessHours = calcChargeBetweenTimes(START_BUSINESS_TIME, END_BUSINESS_TIME, BUSINESS_HOURS_RATE_PER_MIN);
+		double beforeHours = calcChargeBetweenTimes(startTime, START_BUSINESS_TIME, AFTER_HOURS_RATE_PER_MIN);
+		double afterHours = calcChargeBetweenTimes(END_BUSINESS_TIME, endTime, AFTER_HOURS_RATE_PER_MIN);
 		return beforeHours + businessHours + afterHours;
 	}
 	
@@ -84,9 +99,9 @@ public class ChargeCalculator {
 	}
 	
 	
-	
+	// Midnight is considered after a time.
 	private static boolean isTimeOnOrBefore(LocalTime first, LocalTime second) {
-		return first.equals(second) || first.isBefore(second);
+		return first != LocalTime.MIDNIGHT && (first.equals(second) || first.isBefore(second));
 	}
 	
 	
@@ -96,8 +111,8 @@ public class ChargeCalculator {
 		if (startTime.equals(LocalTime.MIDNIGHT) && endTime.equals(LocalTime.MIDNIGHT)) {
 			return MINUTES_IN_DAY * charge;
 		}
-
-		Long minutesBetween = minutesBetweenRounded(startTime, endTime);
+		
+		Long minutesBetween = minutesBetweenRounded(startTime, endTime);	
 		return minutesBetween * charge;
 	}
 	
@@ -105,7 +120,13 @@ public class ChargeCalculator {
 	
 	private static long minutesBetweenRounded(LocalTime startTime, LocalTime endTime) {
 		LocalTime startTimeRounded = startTime.withSecond(0);
-		LocalTime endTimeRounded = endTime.withSecond(0);	
+		LocalTime endTimeRounded = endTime.withSecond(0);
+		
+		if (endTime.equals(LocalTime.MIDNIGHT)) {
+			startTimeRounded = startTimeRounded.withHour(24 - startTimeRounded.getHour());
+			return Duration.between(endTimeRounded, startTimeRounded).toMinutes();
+		}
+
 		return Duration.between(startTimeRounded, endTimeRounded).toMinutes();
 	}
 	
