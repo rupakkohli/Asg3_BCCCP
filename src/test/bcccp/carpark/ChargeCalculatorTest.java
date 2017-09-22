@@ -22,9 +22,9 @@ public class ChargeCalculatorTest {
 	
 	@Test
 	public void testOutOfHoursPartDay() {
-		// 4 minutes, rounding down
+		// 5 minutes, rounding down each time to nearest minute.
 		double outOfHours = ChargeCalculator.calcDayCharge(LocalTime.of(1, 10, 27), LocalTime.of(19, 15, 17), DayOfWeek.SATURDAY);
-		double minutesExpected = 18 * 60 + 4;
+		double minutesExpected = 18 * 60 + 5;
 		assertEquals(outOfHours, minutesExpected * 2 , DELTA);
 	}
 	

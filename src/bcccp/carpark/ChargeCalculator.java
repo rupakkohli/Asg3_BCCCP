@@ -36,7 +36,7 @@ public class ChargeCalculator {
 	
 	
 	// Calculate the charge for a single day.
-	public static double calcDayCharge(LocalTime startTime, LocalTime endTime, DayOfWeek dayOfWeek) {
+	public static double calcDayCharge(LocalTime startTime, LocalTime endTime, DayOfWeek dayOfWeek) {	
 		if (BUSINESS_DAYS.contains(dayOfWeek)) {
 			return calcBusinessDayCharge(startTime, endTime);
 		}
@@ -46,8 +46,9 @@ public class ChargeCalculator {
 	}
 	
 	
+	
 	private static double calcBusinessDayCharge(LocalTime startTime, LocalTime endTime) {
-		if (endTime.isBefore(END_BUSINESS_TIME)) {
+		if (endTime.isBefore(START_BUSINESS) || startTime.isAfter(END_BUSINESS_TIME)) {
 			return calcChargeBetweenTimes(startTime, endTime, OUT_OF_HOURS_RATE);
 		}
 		
@@ -63,8 +64,16 @@ public class ChargeCalculator {
 			return MINUTES_IN_DAY * charge;
 		}
 
-		Long minutesBetween = Duration.between(startTime, endTime).toMinutes();
+		Long minutesBetween = minutesBetweenRounded(startTime, endTime);
 		return minutesBetween * charge;
+	}
+	
+	
+	
+	private static long minutesBetweenRounded(LocalTime startTime, LocalTime endTime) {
+		LocalTime startTimeRounded = startTime.withSecond(0);
+		LocalTime endTimeRounded = endTime.withSecond(0);	
+		return Duration.between(startTimeRounded, endTimeRounded).toMinutes();
 	}
 	
 	
