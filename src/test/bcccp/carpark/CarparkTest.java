@@ -19,8 +19,6 @@ public class CarparkTest {
 	
 	private IAdhocTicketDAO adhocTicketMock_ = mock(IAdhocTicketDAO.class);
 	private ISeasonTicketDAO seasonTicketMock_ = mock(ISeasonTicketDAO.class);
-	private Carpark validCarpark 
-		= new Carpark("Name", 2, adhocTicketMock_, seasonTicketMock_);
 	
 	@Test
 	public void TestCarparkNameNull() {
@@ -76,5 +74,22 @@ public class CarparkTest {
 		// Should be full at this point.
 		carpark.recordAdhocTicketEntry();
 		assertTrue(carpark.isFull());
+	}
+	
+	@Test
+	public void IssueAdhocTicketWhenFull() {
+		Carpark carpark = new Carpark("Name", 1, this.adhocTicketMock_, this.seasonTicketMock_);
+		carpark.recordAdhocTicketEntry();
+		
+		// Carpark is now full. Should not issue ticket.
+		expectedException.expect(RuntimeException.class);
+		expectedException.expectMessage(containsString("full"));
+		IAdhocTicket ticket = carpark.issueAdhocTicket();
+		ticket.isCurrent();
+	}
+	
+	@Test
+	public void Issue() {
+		
 	}
 }
