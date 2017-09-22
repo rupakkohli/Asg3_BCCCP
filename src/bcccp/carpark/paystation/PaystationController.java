@@ -6,7 +6,8 @@ import bcccp.tickets.adhoc.IAdhocTicket;
 public class PaystationController 
 		implements IPaystationController {
 	
-	private enum STATE { IDLE, WAITING, REJECTED, PAID } 
+	// changed to public
+	public enum STATE { IDLE, WAITING, REJECTED, PAID } 
 	
 	private STATE state_;
 	
@@ -20,6 +21,20 @@ public class PaystationController
 	
 
 	public PaystationController(ICarpark carpark, IPaystationUI ui) {
+		
+		// Throw runtime exception if either parameter is null
+
+		if (carpark == null || ui == null) {
+			if (carpark == null && ui != null) {
+				throw new RuntimeException("Carpark parameter is null");
+			}else if (ui == null && carpark != null){
+				throw new RuntimeException("Paystation UI parameter is null");
+			}else {
+				throw new RuntimeException("Both parameters are null");
+			}
+			
+		}
+		
 		
 		this.carpark_ = carpark;
 		this.ui_ = ui;
@@ -36,7 +51,7 @@ public class PaystationController
 
 	
 	
-	private void setState(STATE newState) {
+	public void setState(STATE newState) {
 		switch (newState) {
 		
 		case IDLE: 
@@ -52,8 +67,8 @@ public class PaystationController
 			break;
 			
 		case REJECTED: 
-			state_ = STATE.WAITING;
-			log("setState: WAITING");
+			state_ = STATE.REJECTED;
+			log("setState: REJECTED");
 			break;
 			
 		case PAID: 
@@ -66,6 +81,10 @@ public class PaystationController
 			break;
 			
 		}			
+	}
+	
+	public STATE getState() {
+		return this.state_;
 	}
 
 	
