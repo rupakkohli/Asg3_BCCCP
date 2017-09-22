@@ -17,27 +17,41 @@ public class ChargeCalculatorTest {
 	@Test
 	public void testOutOfHoursFullDay() {
 		double outOfHours = ChargeCalculator.calcDayCharge(LocalTime.MIDNIGHT, LocalTime.MIDNIGHT, DayOfWeek.SATURDAY);
-		assertEquals(outOfHours, 2 * 1440, DELTA);
+		assertEquals(2 * 1440, outOfHours, DELTA);
 	}
+	
+	
 	
 	@Test
 	public void testOutOfHoursPartDay() {
 		// 5 minutes, rounding down each time to nearest minute.
 		double outOfHours = ChargeCalculator.calcDayCharge(LocalTime.of(1, 10, 27), LocalTime.of(19, 15, 17), DayOfWeek.SATURDAY);
 		double minutesExpected = 18 * 60 + 5;
-		assertEquals(outOfHours, minutesExpected * 2 , DELTA);
+		assertEquals(minutesExpected * 2 , outOfHours, DELTA);
 	}
+	
+	
 	
 	@Test
 	public void testBeforeStartOfBusiness() {
 		double beforeStart = ChargeCalculator.calcDayCharge(LocalTime.of(1,0,0), LocalTime.of(6, 59, 59), DayOfWeek.MONDAY);
 		double minutes = 5 * 60 + 59;
-		assertEquals(beforeStart, minutes * 2, DELTA);
+		assertEquals(minutes * 2, beforeStart, DELTA);
 	}
+	
+	
 	
 	@Test
 	public void testAfterEndOfBusiness() {
 		double beforeStart = ChargeCalculator.calcDayCharge(LocalTime.of(19, 0, 1), LocalTime.of(20, 0, 1), DayOfWeek.MONDAY);
-		assertEquals(beforeStart, 60 * 2, DELTA);
+		assertEquals(60 * 2, beforeStart,DELTA);
 	}
+	
+	
+	@Test
+	public void testExactlyDuringBusiness() {
+		double exactlyDuring = ChargeCalculator.calcDayCharge(LocalTime.of(7, 0, 0), LocalTime.of(19,  0, 0), DayOfWeek.MONDAY);
+		assertEquals(12 * 60 * 5, exactlyDuring, DELTA);
+	}
+	
 }
