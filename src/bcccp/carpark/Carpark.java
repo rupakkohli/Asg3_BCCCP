@@ -1,9 +1,7 @@
 package bcccp.carpark;
 
-import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import bcccp.tickets.adhoc.IAdhocTicket;
@@ -121,9 +119,19 @@ public class Carpark implements ICarpark {
 	public boolean isSeasonTicketValid(String barcode) {		
 		ISeasonTicket ticket = seasonTicketDAO.findTicketById(barcode);
 		
-		// TODO implement full validation logic
-		return ticket != null;
+		// The ticket could not be found.
+		if (ticket == null) {
+			return false;
+		}
+		
+		if (!this.isTicketCurrent(ticket)) {
+			return false;
+		}
+		
+		// The ticket is current, check that the current time is in business hours.
+		return this.isCurrentTimeBusinessHours();
 	}
+	
 
 	
 	
@@ -150,6 +158,25 @@ public class Carpark implements ICarpark {
 		log(ticket.toString());
 	}
 
+	
+	
+	private boolean isTicketCurrent(ISeasonTicket ticket) {
+		long currentDateTime = System.currentTimeMillis();
+		long start = ticket.getStartValidPeriod();
+		long end = ticket.getEndValidPeriod();
+		
+		return currentDateTime >= start && currentDateTime <= end;
+		
+	}
+	
+	
+	
+	private boolean isCurrentTimeBusinessHours() {
+		LocalTime currentDateTime = Utilities.toLocalDateTime(System.currentTimeMillis()).toLocalTime();
+		return Utilities.isTimeOnOrAfter(currentDateTime, Constants.START_BUSINESS_TIME)
+				&& Utilities.isTimeOnOrBefore(currentDateTime, Constants.END_BUSINESS_TIME);
+	}
+	
 	
 	
 	private void log(String message) {
