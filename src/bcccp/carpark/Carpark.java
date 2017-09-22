@@ -1,9 +1,8 @@
 package bcccp.carpark;
 
-import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import bcccp.tickets.adhoc.IAdhocTicket;
@@ -20,12 +19,14 @@ public class Carpark implements ICarpark {
 	private int nParked;
 	private IAdhocTicketDAO adhocTicketDAO;
 	private ISeasonTicketDAO seasonTicketDAO;
+	private ITimeProvider timeProvider;
 	
 	
 	
 	public Carpark(String name, int capacity, 
 			IAdhocTicketDAO adhocTicketDAO, 
-			ISeasonTicketDAO seasonTicketDAO) {
+			ISeasonTicketDAO seasonTicketDAO,
+			ITimeProvider timeProvider) {
 		
 		this.validateName(name);
 		this.validateCapacity(capacity);
@@ -34,6 +35,7 @@ public class Carpark implements ICarpark {
 		observers = new ArrayList<>();
 		this.adhocTicketDAO = adhocTicketDAO;
 		this.seasonTicketDAO = seasonTicketDAO;
+		this.timeProvider = timeProvider;
 	}
 
 	
@@ -121,9 +123,19 @@ public class Carpark implements ICarpark {
 	public boolean isSeasonTicketValid(String barcode) {		
 		ISeasonTicket ticket = seasonTicketDAO.findTicketById(barcode);
 		
-		// TODO implement full validation logic
-		return ticket != null;
+		// The ticket could not be found.
+		if (ticket == null) {
+			return false;
+		}
+		
+		if (!this.isTicketCurrent(ticket)) {
+			return false;
+		}
+		
+		// The ticket is current, check that the current time is in business hours.
+		return this.isCurrentTimeBusinessHours();
 	}
+	
 
 	
 	
@@ -150,6 +162,25 @@ public class Carpark implements ICarpark {
 		log(ticket.toString());
 	}
 
+	
+	
+	private boolean isTicketCurrent(ISeasonTicket ticket) {
+		LocalDateTime currentDateTime = this.timeProvider.getLocalDateTime();
+		LocalDateTime start = Utilities.toLocalDateTime(ticket.getStartValidPeriod());
+		LocalDateTime end = Utilities.toLocalDateTime(ticket.getEndValidPeriod());
+		
+		return Utilities.isTimeOnOrAfter(currentDateTime, start) 
+				&& Utilities.isTimeOnOrBefore(currentDateTime, end);
+	}
+	
+	
+	
+	private boolean isCurrentTimeBusinessHours() {
+		LocalTime currentDateTime = this.timeProvider.getLocalDateTime().toLocalTime();
+		return Utilities.isTimeOnOrAfter(currentDateTime, Constants.START_BUSINESS_TIME)
+				&& Utilities.isTimeOnOrBefore(currentDateTime, Constants.END_BUSINESS_TIME);
+	}
+	
 	
 	
 	private void log(String message) {
