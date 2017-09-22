@@ -17,11 +17,11 @@ import static org.junit.Assert.*;
 
 
 public class PaystationControllerTest {
-	private static PaystationController mPController;
-	private static Carpark mCarpark;
-	private static PaystationUI mPUI;
 	
-	IAdhocTicketDAO adhocTicketMock_;
+	private static PaystationController mPController_;
+	private static Carpark mCarpark_;
+	private static PaystationUI mPUI_;
+	
 	
 
 	
@@ -30,11 +30,11 @@ public class PaystationControllerTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		mPUI = mock(PaystationUI.class);
-		mCarpark = mock(Carpark.class);
-		mPController = new PaystationController(mCarpark, mPUI);
-		adhocTicketMock_ = mock(IAdhocTicketDAO.class);
+		mPUI_ = mock(PaystationUI.class);
+		mCarpark_ = mock(Carpark.class);
+		mPController_ = new PaystationController(mCarpark_, mPUI_);
 	}
+	
 	
 	
 	@Test
@@ -42,8 +42,9 @@ public class PaystationControllerTest {
 	{
 		 expectedException.expect(RuntimeException.class);
 		 expectedException.expectMessage(containsString("UI"));
-		 new PaystationController(mCarpark, null);
+		 new PaystationController(mCarpark_, null);
 	}
+	
 	
 	
 	@Test
@@ -51,8 +52,10 @@ public class PaystationControllerTest {
 	{
 		 expectedException.expect(RuntimeException.class);
 		 expectedException.expectMessage(containsString("Carpark"));
-		 new PaystationController(null, mPUI);
+		 new PaystationController(null, mPUI_);
 	}
+	
+	
 	
 	@Test
 	public void PayStationControllerBothNull() {
@@ -61,50 +64,61 @@ public class PaystationControllerTest {
 		 new PaystationController(null, null);
 	}
 	
+	
+	
 	@Test 
 	public void testConstructor() {
 		// Check that initialization state is IDLE
-		assertEquals(mPController.getState(), STATE.IDLE);
+		assertEquals(mPController_.getState(), STATE.IDLE);
 	}
+	
 	
 	
 	@Test 
 	public void testTicketInsertedRejected() {
-		mPController.setState(STATE.IDLE);
-		mPController.ticketInserted("adsf1234"); // should be null
-		assertEquals(mPController.getState(), STATE.REJECTED);
+		mPController_.setState(STATE.IDLE);
+		mPController_.ticketInserted("adsf1234"); // should be null
+		assertEquals(mPController_.getState(), STATE.REJECTED);
 	}
+	
 	
 	
 	@Test
 	public void testTicketTakenWaiting() {
-		mPController.setState(STATE.WAITING);
-		mPController.ticketTaken();
-		assertEquals(mPController.getState(), STATE.IDLE);
+		mPController_.setState(STATE.WAITING);
+		mPController_.ticketTaken();
+		assertEquals(mPController_.getState(), STATE.IDLE);
 
 	}
 	
+	
+	
 	@Test
 	public void testTicketTakenRejected() {
-		mPController.setState(STATE.REJECTED);
-		mPController.ticketTaken();
-		assertEquals(mPController.getState(), STATE.IDLE);
+		mPController_.setState(STATE.REJECTED);
+		mPController_.ticketTaken();
+		assertEquals(mPController_.getState(), STATE.IDLE);
 	}
+	
+	
 	
 	@Test
 	public void testTicketTakenPaid() {
-		mPController.setState(STATE.PAID);
-		mPController.ticketTaken();
-		assertEquals(mPController.getState(), STATE.IDLE);
+		mPController_.setState(STATE.PAID);
+		mPController_.ticketTaken();
+		assertEquals(mPController_.getState(), STATE.IDLE);
 	}
+	
+	
 	
 	@Test
 	public void testTicketTakenIdle() {
-		mPController.setState(STATE.IDLE);
-		mPController.ticketTaken();
-		assertEquals(mPController.getState(), STATE.IDLE);
+		mPController_.setState(STATE.IDLE);
+		mPController_.ticketTaken();
+		assertEquals(mPController_.getState(), STATE.IDLE);
 
 	}
 	
 		
+	
 }

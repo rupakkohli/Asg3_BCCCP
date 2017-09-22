@@ -6,7 +6,7 @@ import bcccp.tickets.adhoc.IAdhocTicket;
 public class PaystationController 
 		implements IPaystationController {
 	
-	// changed to public
+	
 	public enum STATE { IDLE, WAITING, REJECTED, PAID } 
 	
 	private STATE state_;

@@ -163,6 +163,10 @@ public class PaystationUI extends JFrame implements IPaystationUI {
 	public void display(String message) {
 		displayTextField.setText(message);	
 	}
+	
+	public String getDisplayText() {
+		return displayTextField.getText();
+	}
 
 	
 	
