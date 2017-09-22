@@ -70,7 +70,11 @@ public class ChargeCalculator {
 			return businessHours + outOfHours;
 		}
 		
-		return 0;
+		// Start time is before and end time after; general case
+		double businessHours = calcChargeBetweenTimes(START_BUSINESS_TIME, END_BUSINESS_TIME, BUSINESS_HOURS_RATE);
+		double beforeHours = calcChargeBetweenTimes(startTime, START_BUSINESS_TIME, OUT_OF_HOURS_RATE);
+		double afterHours = calcChargeBetweenTimes(END_BUSINESS_TIME, endTime, OUT_OF_HOURS_RATE);
+		return beforeHours + businessHours + afterHours;
 	}
 	
 	
