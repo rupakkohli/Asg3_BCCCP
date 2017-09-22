@@ -1,5 +1,6 @@
 package bcccp.carpark;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -164,18 +165,18 @@ public class Carpark implements ICarpark {
 	
 	
 	private boolean isTicketCurrent(ISeasonTicket ticket) {
-		long currentDateTime = System.currentTimeMillis();
-		long start = ticket.getStartValidPeriod();
-		long end = ticket.getEndValidPeriod();
+		LocalDateTime currentDateTime = this.timeProvider.getLocalDateTime();
+		LocalDateTime start = Utilities.toLocalDateTime(ticket.getStartValidPeriod());
+		LocalDateTime end = Utilities.toLocalDateTime(ticket.getEndValidPeriod());
 		
-		return currentDateTime >= start && currentDateTime <= end;
-		
+		return Utilities.isTimeOnOrAfter(currentDateTime, start) 
+				&& Utilities.isTimeOnOrBefore(currentDateTime, end);
 	}
 	
 	
 	
 	private boolean isCurrentTimeBusinessHours() {
-		LocalTime currentDateTime = this.timeProvider.getLocalTime();
+		LocalTime currentDateTime = this.timeProvider.getLocalDateTime().toLocalTime();
 		return Utilities.isTimeOnOrAfter(currentDateTime, Constants.START_BUSINESS_TIME)
 				&& Utilities.isTimeOnOrBefore(currentDateTime, Constants.END_BUSINESS_TIME);
 	}

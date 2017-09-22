@@ -1,9 +1,9 @@
 package bcccp.carpark;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 public interface ITimeProvider {
 
 	// Gets the local time.
-	LocalTime getLocalTime();
+	LocalDateTime getLocalDateTime();
 }

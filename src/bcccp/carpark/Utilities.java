@@ -23,4 +23,16 @@ public class Utilities {
 	public static boolean isTimeOnOrBefore(LocalTime first, LocalTime second) {
 		return first != LocalTime.MIDNIGHT && (first.equals(second) || first.isBefore(second));
 	}
+
+
+
+	public static boolean isTimeOnOrAfter(LocalDateTime first, LocalDateTime second) {
+		return first.equals(second) || first.isAfter(second);
+	}
+	
+	
+	
+	public static boolean isTimeOnOrBefore(LocalDateTime first, LocalDateTime second) {
+		return first.equals(second) || first.isBefore(second);
+	}
 }

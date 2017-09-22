@@ -1,11 +1,11 @@
 package bcccp.carpark;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 // Used to assist with mocking current time.
 public class TimeProvider implements ITimeProvider{
 
-	public LocalTime getLocalTime() {
-		return Utilities.toLocalDateTime(System.currentTimeMillis()).toLocalTime();
+	public LocalDateTime getLocalDateTime() {
+		return Utilities.toLocalDateTime(System.currentTimeMillis());
 	}
 }

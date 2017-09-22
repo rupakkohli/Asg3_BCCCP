@@ -10,11 +10,17 @@ import static org.junit.Assert.*;
 import bcccp.carpark.Carpark;
 import bcccp.carpark.ICarparkObserver;
 import bcccp.carpark.ITimeProvider;
+import bcccp.carpark.TimeProvider;
 import bcccp.tickets.adhoc.IAdhocTicket;
 import bcccp.tickets.adhoc.IAdhocTicketDAO;
+import bcccp.tickets.season.ISeasonTicket;
 import bcccp.tickets.season.ISeasonTicketDAO;
 
 import static org.mockito.Mockito.*;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class CarparkTest {
 
@@ -138,4 +144,98 @@ public class CarparkTest {
 		// The notify carpark event should be called 
 		verify(observerMock).notifyCarparkEvent();
 	}
+	
+	
+	
+	@Test
+	public void testNoSeasonTicket() {
+		// will not return any tickets.
+		IAdhocTicketDAO adhocTicketDaoMock = mock(IAdhocTicketDAO.class);
+		Carpark carpark = new Carpark("Name", 1, adhocTicketDaoMock, this.seasonTicketDaoMock_, timeProvider_);
+		boolean isSeasonTicketValid = carpark.isSeasonTicketValid("barcode");
+		assertFalse(isSeasonTicketValid);
+	}	
+	
+	
+	
+	@Test
+	public void testValidSeasonTicket() {
+		ZonedDateTime startDateTime = ZonedDateTime.parse(
+				"2017-09-18T03:00:00+10:00" ,
+			    DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()));
+		ZonedDateTime endDateTime = startDateTime.plusDays(2);
+		
+		// choose a valid date time between the two values above.
+		// it should also be between the business start / end times.
+		ZonedDateTime validDateTime = startDateTime.plusDays(1).withHour(12);
+		
+		ISeasonTicket seasonTicketMock = mock(ISeasonTicket.class);
+		when(seasonTicketMock.getStartValidPeriod()).thenReturn(startDateTime.toInstant().toEpochMilli());
+		when(seasonTicketMock.getEndValidPeriod()).thenReturn(endDateTime.toInstant().toEpochMilli());
+		
+		ITimeProvider timeProviderMock = mock(ITimeProvider.class);
+		when(timeProviderMock.getLocalDateTime()).thenReturn(validDateTime.toLocalDateTime());
+		
+		ISeasonTicketDAO seasonTicketDaoMock = mock(ISeasonTicketDAO.class);
+		when(seasonTicketDaoMock.findTicketById("barcode")).thenReturn(seasonTicketMock);
+		
+		Carpark carpark = new Carpark("Name", 1, this.adhocTicketDaoMock_, seasonTicketDaoMock, timeProviderMock);
+		boolean isSeasonTicketValid = carpark.isSeasonTicketValid("barcode");
+		assertTrue(isSeasonTicketValid);
+	}	
+	
+	
+	
+	@Test
+	public void testOutdatedSeasonTicket() {
+		ZonedDateTime startDateTime = ZonedDateTime.parse(
+				"2017-09-18T03:00:00+10:00" ,
+			    DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()));
+		ZonedDateTime endDateTime = startDateTime.plusDays(2);
+		
+		// choose a date time outside of the above range
+		ZonedDateTime validDateTime = startDateTime.plusDays(3);
+		
+		ISeasonTicket seasonTicketMock = mock(ISeasonTicket.class);
+		when(seasonTicketMock.getStartValidPeriod()).thenReturn(startDateTime.toInstant().toEpochMilli());
+		when(seasonTicketMock.getEndValidPeriod()).thenReturn(endDateTime.toInstant().toEpochMilli());
+		
+		ITimeProvider timeProviderMock = mock(ITimeProvider.class);
+		when(timeProviderMock.getLocalDateTime()).thenReturn(validDateTime.toLocalDateTime());
+		
+		ISeasonTicketDAO seasonTicketDaoMock = mock(ISeasonTicketDAO.class);
+		when(seasonTicketDaoMock.findTicketById("barcode")).thenReturn(seasonTicketMock);
+		
+		Carpark carpark = new Carpark("Name", 1, this.adhocTicketDaoMock_, seasonTicketDaoMock, timeProviderMock);
+		boolean isSeasonTicketValid = carpark.isSeasonTicketValid("barcode");
+		assertFalse(isSeasonTicketValid);
+	}	
+	
+	
+	
+	@Test
+	public void testSeasonOutsideBusiness() {
+		ZonedDateTime startDateTime = ZonedDateTime.parse(
+				"2017-09-18T03:00:00+10:00" ,
+			    DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()));
+		ZonedDateTime endDateTime = startDateTime.plusDays(2);
+		
+		// date time in range, but the time is outside of business hours.
+		ZonedDateTime validDateTime = startDateTime.plusDays(1).withHour(20);
+		
+		ISeasonTicket seasonTicketMock = mock(ISeasonTicket.class);
+		when(seasonTicketMock.getStartValidPeriod()).thenReturn(startDateTime.toInstant().toEpochMilli());
+		when(seasonTicketMock.getEndValidPeriod()).thenReturn(endDateTime.toInstant().toEpochMilli());
+		
+		ITimeProvider timeProviderMock = mock(ITimeProvider.class);
+		when(timeProviderMock.getLocalDateTime()).thenReturn(validDateTime.toLocalDateTime());
+		
+		ISeasonTicketDAO seasonTicketDaoMock = mock(ISeasonTicketDAO.class);
+		when(seasonTicketDaoMock.findTicketById("barcode")).thenReturn(seasonTicketMock);
+		
+		Carpark carpark = new Carpark("Name", 1, this.adhocTicketDaoMock_, seasonTicketDaoMock, timeProviderMock);
+		boolean isSeasonTicketValid = carpark.isSeasonTicketValid("barcode");
+		assertFalse(isSeasonTicketValid);
+	}	
+	
 }
