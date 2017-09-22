@@ -14,6 +14,8 @@ import bcccp.carpark.paystation.PaystationController.STATE;
 import bcccp.tickets.adhoc.AdhocTicketDAO;
 import bcccp.tickets.adhoc.AdhocTicketFactory;
 import bcccp.tickets.adhoc.IAdhocTicketDAO;
+import bcccp.tickets.season.ISeasonTicket;
+import bcccp.tickets.season.SeasonTicket;
 import bcccp.tickets.season.SeasonTicketDAO;
 import bcccp.tickets.season.UsageRecordFactory;
 
@@ -62,6 +64,21 @@ public class PaystationIntegrationTest {
 		assertEquals(myController_.getState(), PaystationController.STATE.PAID);	
 		myController_.ticketTaken();
 		assertEquals(myController_.getState(), PaystationController.STATE.IDLE);
+
+	}
+	
+	
+
+	@Test
+	public void TestPaystationControllerRejection(){
+		// Setup carpark, UI and Controller
+		
+		myCarpark_ = new Carpark("Carpark", 10, myAdhocDAO_, mySeasonDAO_, mTimeProvider_);
+		myPUI_ = new PaystationUI(0,0);
+		myController_ = new PaystationController(myCarpark_, myPUI_);
+		
+		// First ticket created should be A1
+		myCarpark_.issueAdhocTicket();
 		
 		//Test an invalid ticket
 		
@@ -72,29 +89,29 @@ public class PaystationIntegrationTest {
 		myController_.ticketTaken();
 		assertEquals(myController_.getState(), PaystationController.STATE.IDLE);
 		
+
+	}
+	
+	
+	
+	@Test
+	public void TestPaystationPaymentInvalidState() {
+		myCarpark_ = new Carpark("Carpark", 10, myAdhocDAO_, mySeasonDAO_, mTimeProvider_);
+		myPUI_ = new PaystationUI(0,0);
+		myController_ = new PaystationController(myCarpark_, myPUI_);
 		myCarpark_.issueAdhocTicket();
 		myCarpark_.issueAdhocTicket();
-		
-		// Should be up to A3 now
-		
-		myController_.ticketInserted("A3");
-		assertEquals(myController_.getState(), PaystationController.STATE.WAITING);
-		myController_.ticketTaken();
-		assertEquals(myController_.getState(), PaystationController.STATE.IDLE);
-		
 		// Pay in invalid state
 		myController_.ticketPaid();
 		assertNotEquals(myController_.getState(), PaystationController.STATE.PAID);
-		myController_.ticketInserted("A3");
+		myController_.ticketInserted("A2");
 		myController_.ticketPaid();
 		assertEquals(myController_.getState(), PaystationController.STATE.PAID);	
 		myController_.ticketTaken();
 		assertEquals(myController_.getState(), PaystationController.STATE.IDLE);
-
-		
-		
 	}
-
+	
+	
 	
 	
 }

@@ -15,6 +15,8 @@ import bcccp.carpark.entry.EntryController.STATE;
 import bcccp.carpark.entry.EntryUI;
 import bcccp.tickets.adhoc.AdhocTicketDAO;
 import bcccp.tickets.adhoc.AdhocTicketFactory;
+import bcccp.tickets.season.ISeasonTicket;
+import bcccp.tickets.season.SeasonTicket;
 import bcccp.tickets.season.SeasonTicketDAO;
 import bcccp.tickets.season.UsageRecordFactory;
 
@@ -144,8 +146,10 @@ public class EntryControllerIntegration {
 		
 	}
 	
+	
+	
 	@Test
-	public void EntryControllerSeasonTicket() {
+	public void EntryControllerSeasonTicketInvalid() {
 		myCarpark_ = new Carpark("Carpark", 10, myAdhocDAO_, mySeasonDAO_, mTimeProvider_);
 		mEntryController_ = new EntryController(myCarpark_, entryGate_, eos_, eis_, myEntryUI_);
 		
@@ -159,9 +163,10 @@ public class EntryControllerIntegration {
 		assertEquals(mEntryController_.getState(), EntryController.STATE.WAITING);
 		
 		mEntryController_.ticketInserted("adsf");
-		assertEquals(mEntryController_.getState(), EntryController.STATE.REJECTED);
+		assertNotEquals(mEntryController_.getState(), EntryController.STATE.VALIDATED);
 		
 	}
+	
 	
 	
 }
