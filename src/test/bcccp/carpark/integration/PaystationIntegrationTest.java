@@ -41,6 +41,8 @@ public class PaystationIntegrationTest {
 		
 	}
 	
+	
+	
 	@Test
 	public void TestPaystationControllerIntegration(){
 		
@@ -55,20 +57,20 @@ public class PaystationIntegrationTest {
 		myController_.ticketInserted("A1");
 		
 		// Test full state diagram from idle to paid to idle
-		assertEquals(myController_.getState(), STATE.WAITING);
+		assertEquals(myController_.getState(), PaystationController.STATE.WAITING);
 		myController_.ticketPaid();
-		assertEquals(myController_.getState(), STATE.PAID);	
+		assertEquals(myController_.getState(), PaystationController.STATE.PAID);	
 		myController_.ticketTaken();
-		assertEquals(myController_.getState(), STATE.IDLE);
+		assertEquals(myController_.getState(), PaystationController.STATE.IDLE);
 		
 		//Test an invalid ticket
 		
 		myController_.ticketInserted("A3"); // Hasn't been created yet so invalid
 		
-		assertEquals(myController_.getState(), STATE.REJECTED);
+		assertEquals(myController_.getState(), PaystationController.STATE.REJECTED);
 		assertEquals(myPUI_.getDisplayText(), "Take Rejected Ticket");
 		myController_.ticketTaken();
-		assertEquals(myController_.getState(), STATE.IDLE);
+		assertEquals(myController_.getState(), PaystationController.STATE.IDLE);
 		
 		myCarpark_.issueAdhocTicket();
 		myCarpark_.issueAdhocTicket();
@@ -76,29 +78,23 @@ public class PaystationIntegrationTest {
 		// Should be up to A3 now
 		
 		myController_.ticketInserted("A3");
-		assertEquals(myController_.getState(), STATE.WAITING);
+		assertEquals(myController_.getState(), PaystationController.STATE.WAITING);
 		myController_.ticketTaken();
-		assertEquals(myController_.getState(), STATE.IDLE);
+		assertEquals(myController_.getState(), PaystationController.STATE.IDLE);
 		
 		// Pay in invalid state
 		myController_.ticketPaid();
-		assertNotEquals(myController_.getState(), STATE.PAID);
+		assertNotEquals(myController_.getState(), PaystationController.STATE.PAID);
 		myController_.ticketInserted("A3");
 		myController_.ticketPaid();
-		assertEquals(myController_.getState(), STATE.PAID);	
+		assertEquals(myController_.getState(), PaystationController.STATE.PAID);	
 		myController_.ticketTaken();
-		assertEquals(myController_.getState(), STATE.IDLE);
+		assertEquals(myController_.getState(), PaystationController.STATE.IDLE);
+
 		
-
+		
 	}
-	
-	
-	
 
-
-	
-	
-	
 	
 	
 }
