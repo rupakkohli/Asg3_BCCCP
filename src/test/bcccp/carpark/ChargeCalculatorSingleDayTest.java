@@ -13,7 +13,7 @@ import org.junit.rules.ExpectedException;
 
 import bcccp.carpark.ChargeCalculator;
 
-public class ChargeCalculatorTest {
+public class ChargeCalculatorSingleDayTest {
 	
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();

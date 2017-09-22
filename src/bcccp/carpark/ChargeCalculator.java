@@ -47,6 +47,7 @@ public class ChargeCalculator {
 	}
 	
 	
+	
 	public double calcParkingCharge() {
 		LocalDate entryDate = this.entryDateTime.toLocalDate();
 		LocalDate exitDate = this.exitDateTime.toLocalDate();
