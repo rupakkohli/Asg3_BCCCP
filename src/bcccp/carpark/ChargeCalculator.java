@@ -56,12 +56,18 @@ public class ChargeCalculator {
 			return calcChargeBetweenTimes(startTime, endTime, BUSINESS_HOURS_RATE);
 		}
 		
+		
+		
 		return 0;
 	}
+	
+	
 	
 	private static boolean isTimeOnOrAfter(LocalTime first, LocalTime second) {
 		return first.equals(second) || first.isAfter(second);
 	}
+	
+	
 	
 	private static boolean isTimeOnOrBefore(LocalTime first, LocalTime second) {
 		return first.equals(second) || first.isBefore(second);

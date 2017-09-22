@@ -54,4 +54,11 @@ public class ChargeCalculatorTest {
 		assertEquals(12 * 60 * 5, exactlyDuring, DELTA);
 	}
 	
+	
+	
+	@Test
+	public void testDuringBusiness() {
+		double during = ChargeCalculator.calcDayCharge(LocalTime.of(8, 5, 19), LocalTime.of(14, 3, 27), DayOfWeek.MONDAY);
+		assertEquals((6 * 60 - 2) * 5, during, DELTA);
+	}
 }
