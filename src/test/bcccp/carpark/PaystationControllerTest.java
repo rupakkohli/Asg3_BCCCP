@@ -69,25 +69,25 @@ public class PaystationControllerTest {
 	@Test 
 	public void testConstructor() {
 		// Check that initialization state is IDLE
-		assertEquals(mPController_.getState(), STATE.IDLE);
+		assertEquals(mPController_.getState(), PaystationController.STATE.IDLE);
 	}
 	
 	
 	
 	@Test 
 	public void testTicketInsertedRejected() {
-		mPController_.setState(STATE.IDLE);
+		mPController_.setState(PaystationController.STATE.IDLE);
 		mPController_.ticketInserted("adsf1234"); // should be null
-		assertEquals(mPController_.getState(), STATE.REJECTED);
+		assertEquals(mPController_.getState(), PaystationController.STATE.REJECTED);
 	}
 	
 	
 	
 	@Test
 	public void testTicketTakenWaiting() {
-		mPController_.setState(STATE.WAITING);
+		mPController_.setState(PaystationController.STATE.WAITING);
 		mPController_.ticketTaken();
-		assertEquals(mPController_.getState(), STATE.IDLE);
+		assertEquals(mPController_.getState(), PaystationController.STATE.IDLE);
 
 	}
 	
@@ -95,27 +95,27 @@ public class PaystationControllerTest {
 	
 	@Test
 	public void testTicketTakenRejected() {
-		mPController_.setState(STATE.REJECTED);
+		mPController_.setState(PaystationController.STATE.REJECTED);
 		mPController_.ticketTaken();
-		assertEquals(mPController_.getState(), STATE.IDLE);
+		assertEquals(mPController_.getState(), PaystationController.STATE.IDLE);
 	}
 	
 	
 	
 	@Test
 	public void testTicketTakenPaid() {
-		mPController_.setState(STATE.PAID);
+		mPController_.setState(PaystationController.STATE.PAID);
 		mPController_.ticketTaken();
-		assertEquals(mPController_.getState(), STATE.IDLE);
+		assertEquals(mPController_.getState(), PaystationController.STATE.IDLE);
 	}
 	
 	
 	
 	@Test
 	public void testTicketTakenIdle() {
-		mPController_.setState(STATE.IDLE);
+		mPController_.setState(PaystationController.STATE.IDLE);
 		mPController_.ticketTaken();
-		assertEquals(mPController_.getState(), STATE.IDLE);
+		assertEquals(mPController_.getState(), PaystationController.STATE.IDLE);
 
 	}
 	
