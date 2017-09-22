@@ -126,4 +126,13 @@ public class ChargeCalculatorTest {
 		assertEquals(outOfHours + businessHours, charge, DELTA);
 	}
 	
+	
+	
+	@Test
+	public void testStartMidnightEndMidnightBusinessDay() {
+		double charge = ChargeCalculator.calcDayCharge(LocalTime.MIDNIGHT, LocalTime.MIDNIGHT, DayOfWeek.MONDAY);
+		double outOfHours = (7 * 60 * 2.0 / 60) + (5 * 60 * 2.0 / 60);
+		double businessHours = 12 * 60 * 5.0 / 60;
+		assertEquals(outOfHours + businessHours, charge, DELTA);
+	}
 }
