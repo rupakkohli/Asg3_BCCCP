@@ -103,8 +103,8 @@ public class Carpark implements ICarpark {
 		
 	@Override
 	public float calculateAddHocTicketCharge(long entryDateTime) {
-		//TODO Implement charge logic
-		return 3.0f;
+		ChargeCalculator calculator = new ChargeCalculator(entryDateTime, System.currentTimeMillis());
+		return calculator.calcParkingCharge();
 	}
 
 	

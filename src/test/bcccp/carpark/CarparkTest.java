@@ -19,8 +19,6 @@ public class CarparkTest {
 	
 	private IAdhocTicketDAO adhocTicketMock_ = mock(IAdhocTicketDAO.class);
 	private ISeasonTicketDAO seasonTicketMock_ = mock(ISeasonTicketDAO.class);
-	private Carpark validCarpark 
-		= new Carpark("Name", 2, adhocTicketMock_, seasonTicketMock_);
 	
 	@Test
 	public void TestCarparkNameNull() {

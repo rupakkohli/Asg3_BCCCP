@@ -48,7 +48,7 @@ public class ChargeCalculator {
 	
 	
 	
-	public double calcParkingCharge() {
+	public float calcParkingCharge() {
 		LocalDate entryDate = this.entryDateTime.toLocalDate();
 		LocalDate exitDate = this.exitDateTime.toLocalDate();
 		LocalDate currentDate = entryDate;
@@ -63,7 +63,7 @@ public class ChargeCalculator {
 		}
 		
 		charge += calcDayCharge(currentStartTime, this.exitDateTime.toLocalTime(), currentDate.getDayOfWeek());
-		return charge;
+		return (float) charge;
 	}
 	
 	
