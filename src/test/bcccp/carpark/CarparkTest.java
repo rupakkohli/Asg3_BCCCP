@@ -3,10 +3,12 @@ package test.bcccp.carpark;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 import bcccp.carpark.Carpark;
+import bcccp.carpark.ICarparkObserver;
 import bcccp.tickets.adhoc.IAdhocTicket;
 import bcccp.tickets.adhoc.IAdhocTicketDAO;
 import bcccp.tickets.season.ISeasonTicketDAO;
@@ -17,53 +19,65 @@ public class CarparkTest {
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 	
-	private IAdhocTicketDAO adhocTicketMock_ = mock(IAdhocTicketDAO.class);
-	private ISeasonTicketDAO seasonTicketMock_ = mock(ISeasonTicketDAO.class);
+	private IAdhocTicketDAO adhocTicketDaoMock_ = mock(IAdhocTicketDAO.class);
+	private ISeasonTicketDAO seasonTicketDaoMock_ = mock(ISeasonTicketDAO.class);
 	
 	@Test
-	public void TestCarparkNameNull() {
+	public void testCarparkNameNull() {
 		expectedException.expect(RuntimeException.class);
 		expectedException.expectMessage(containsString("name"));
-		new Carpark(null, 1, this.adhocTicketMock_, this.seasonTicketMock_);
+		new Carpark(null, 1, this.adhocTicketDaoMock_, this.seasonTicketDaoMock_);
 	}
 	
+	
+	
 	@Test
-	public void TestCarparkNameEmpty() {
+	public void testCarparkNameEmpty() {
 		expectedException.expect(RuntimeException.class);
 		expectedException.expectMessage(containsString("name"));
-		new Carpark("", 1, this.adhocTicketMock_, this.seasonTicketMock_);
+		new Carpark("", 1, this.adhocTicketDaoMock_, this.seasonTicketDaoMock_);
 	}
 	
+	
+	
 	@Test
-	public void TestCarparkNameEmptySpace() {
+	public void testCarparkNameEmptySpace() {
 		expectedException.expect(RuntimeException.class);
 		expectedException.expectMessage(containsString("name"));
-		new Carpark(" ", 1, this.adhocTicketMock_, this.seasonTicketMock_);
+		new Carpark(" ", 1, this.adhocTicketDaoMock_, this.seasonTicketDaoMock_);
 	}
 	
+	
+	
 	@Test
-	public void TestCarparkNegativeCapacity() {
+	public void testCarparkNegativeCapacity() {
 		expectedException.expect(RuntimeException.class);
 		expectedException.expectMessage(containsString("capacity"));
-		new Carpark("Name", -1, this.adhocTicketMock_, this.seasonTicketMock_);
+		new Carpark("Name", -1, this.adhocTicketDaoMock_, this.seasonTicketDaoMock_);
 	}
 	
+	
+	
 	@Test
-	public void TestCarparkZeroCapacity() {
+	public void testCarparkZeroCapacity() {
 		expectedException.expect(RuntimeException.class);
 		expectedException.expectMessage(containsString("capacity"));
-		new Carpark("Name", 0, this.adhocTicketMock_, this.seasonTicketMock_);
+		new Carpark("Name", 0, this.adhocTicketDaoMock_, this.seasonTicketDaoMock_);
 	}
 	
+	
+	
 	@Test
-	public void TestGetName() {
-		Carpark carpark = new Carpark("Name", 1, this.adhocTicketMock_, this.seasonTicketMock_);
+	public void testGetName() {
+		Carpark carpark = new Carpark("Name", 1, this.adhocTicketDaoMock_, this.seasonTicketDaoMock_);
 		assertEquals("Name", carpark.getName());
 	}
 	
+	
+	
 	@Test
-	public void TestIsFull() {
-		Carpark carpark = new Carpark("Name", 2, this.adhocTicketMock_, this.seasonTicketMock_);
+	public void testIsFull() {
+		Carpark carpark = new Carpark("Name", 2, this.adhocTicketDaoMock_, this.seasonTicketDaoMock_);
 		// Should not be full at the start
 		assertFalse(carpark.isFull());
 		
@@ -76,9 +90,11 @@ public class CarparkTest {
 		assertTrue(carpark.isFull());
 	}
 	
+	
+	
 	@Test
-	public void IssueAdhocTicketWhenFull() {
-		Carpark carpark = new Carpark("Name", 1, this.adhocTicketMock_, this.seasonTicketMock_);
+	public void testIssueAdhocTicketWhenFull() {
+		Carpark carpark = new Carpark("Name", 1, this.adhocTicketDaoMock_, this.seasonTicketDaoMock_);
 		carpark.recordAdhocTicketEntry();
 		
 		// Carpark is now full. Should not issue ticket.
@@ -88,8 +104,35 @@ public class CarparkTest {
 		ticket.isCurrent();
 	}
 	
+	
+	
 	@Test
-	public void Issue() {
+	public void testGetValidAdhocTicket() {
+		IAdhocTicket adhocTicket = mock(IAdhocTicket.class);
+		when(adhocTicket.getBarcode()).thenReturn("barcode");
+	
+		IAdhocTicketDAO adhocTicketDaoMock = mock(IAdhocTicketDAO.class);
+		when(adhocTicketDaoMock.findTicketByBarcode("barcode")).thenReturn(adhocTicket);
 		
+		Carpark carpark = new Carpark("carpark", 2, adhocTicketDaoMock, this.seasonTicketDaoMock_);
+		IAdhocTicket result = carpark.getAdhocTicket("barcode");
+		assertEquals(result.getBarcode(), "barcode");
+	}
+	
+	
+	
+	@Test
+	public void testRecordAdhocTicketExit() {
+		Carpark carpark = new Carpark("Name", 1, this.adhocTicketDaoMock_, this.seasonTicketDaoMock_);
+		ICarparkObserver observerMock = mock(ICarparkObserver.class);
+		carpark.register(observerMock);
+		
+		carpark.recordAdhocTicketEntry();
+		assertTrue(carpark.isFull());
+		carpark.recordAdhocTicketEntry();
+		carpark.recordAdhocTicketExit();
+		
+		// The notify carpark event should be called 
+		verify(observerMock).notifyCarparkEvent();
 	}
 }
