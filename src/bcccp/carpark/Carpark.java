@@ -1,6 +1,9 @@
 package bcccp.carpark;
 
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import bcccp.tickets.adhoc.IAdhocTicket;
@@ -9,6 +12,7 @@ import bcccp.tickets.season.ISeasonTicket;
 import bcccp.tickets.season.ISeasonTicketDAO;
 
 public class Carpark implements ICarpark {
+	
 	
 	private List<ICarparkObserver> observers;
 	private String carparkId;
@@ -90,6 +94,10 @@ public class Carpark implements ICarpark {
 	
 	@Override
 	public IAdhocTicket issueAdhocTicket() {
+		if (this.isFull()) {
+			throw new RuntimeException("Could not issue an ad hoc ticket, carpark was full");
+		}
+		
 		return adhocTicketDAO.createTicket(carparkId);
 	}
 	
@@ -161,7 +169,9 @@ public class Carpark implements ICarpark {
 	@Override
 	public void recordAdhocTicketExit() {
 		nParked--;
-		notifyObservers();		
+		if (this.isFull()) {
+			notifyObservers();
+		}
 	}
 
 
