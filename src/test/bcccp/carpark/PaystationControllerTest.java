@@ -4,7 +4,6 @@ import bcccp.carpark.Carpark;
 import bcccp.carpark.paystation.PaystationController;
 import bcccp.carpark.paystation.PaystationController.STATE;
 import bcccp.tickets.adhoc.IAdhocTicketDAO;
-import bcccp.tickets.season.ISeasonTicketDAO;
 import bcccp.carpark.paystation.PaystationUI;
 import static org.mockito.Mockito.*;
 
@@ -22,8 +21,9 @@ public class PaystationControllerTest {
 	private static Carpark mCarpark;
 	private static PaystationUI mPUI;
 	
-	private IAdhocTicketDAO adhocTicketMock_ = mock(IAdhocTicketDAO.class);
-	private ISeasonTicketDAO seasonTicketMock_ = mock(ISeasonTicketDAO.class);
+	IAdhocTicketDAO adhocTicketMock_;
+	
+
 	
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
@@ -31,7 +31,9 @@ public class PaystationControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		mPUI = mock(PaystationUI.class);
-		mCarpark = new Carpark("Carpark", 10, this.adhocTicketMock_, this.seasonTicketMock_);
+		mCarpark = mock(Carpark.class);
+		mPController = new PaystationController(mCarpark, mPUI);
+		adhocTicketMock_ = mock(IAdhocTicketDAO.class);
 	}
 	
 	
@@ -59,15 +61,50 @@ public class PaystationControllerTest {
 		 new PaystationController(null, null);
 	}
 	
-	
+	@Test 
+	public void testConstructor() {
+		// Check that initialization state is IDLE
+		assertEquals(mPController.getState(), STATE.IDLE);
+	}
 	
 	
 	@Test 
-	public void testWaiting() {
-		mPController = new PaystationController(mCarpark, mPUI);
+	public void testTicketInsertedRejected() {
 		mPController.setState(STATE.IDLE);
-		mPController.ticketInserted("");
-		assertEquals(mPController.getState(), STATE.WAITING);
+		mPController.ticketInserted("adsf1234"); // should be null
+		assertEquals(mPController.getState(), STATE.REJECTED);
 	}
+	
+	
+	@Test
+	public void testTicketTakenWaiting() {
+		mPController.setState(STATE.WAITING);
+		mPController.ticketTaken();
+		assertEquals(mPController.getState(), STATE.IDLE);
+
+	}
+	
+	@Test
+	public void testTicketTakenRejected() {
+		mPController.setState(STATE.REJECTED);
+		mPController.ticketTaken();
+		assertEquals(mPController.getState(), STATE.IDLE);
+	}
+	
+	@Test
+	public void testTicketTakenPaid() {
+		mPController.setState(STATE.PAID);
+		mPController.ticketTaken();
+		assertEquals(mPController.getState(), STATE.IDLE);
+	}
+	
+	@Test
+	public void testTicketTakenIdle() {
+		mPController.setState(STATE.IDLE);
+		mPController.ticketTaken();
+		assertEquals(mPController.getState(), STATE.IDLE);
+
+	}
+	
 		
 }
