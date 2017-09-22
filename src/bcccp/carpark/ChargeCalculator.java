@@ -10,7 +10,7 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
-public class ChargeCalculator {
+public class ChargeCalculator{
 	
 	private static final double MIN_IN_HOUR = 60;
 	
@@ -62,6 +62,10 @@ public class ChargeCalculator {
 			currentDate = currentDate.plusDays(1);
 		}
 		
+		if (currentStartTime.equals(this.exitDateTime.toLocalTime())) {
+			return (float) charge;
+		}
+		
 		charge += calcDayCharge(currentStartTime, this.exitDateTime.toLocalTime(), currentDate.getDayOfWeek());
 		return (float) charge;
 	}
@@ -90,7 +94,7 @@ public class ChargeCalculator {
 		}
 
 		return endTime.isAfter(startTime);
-	}
+	} 
 	
 	
 	
