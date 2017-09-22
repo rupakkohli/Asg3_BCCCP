@@ -3,6 +3,7 @@ package bcccp.carpark;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -27,12 +28,41 @@ public class ChargeCalculator {
 	
 	
 	private static final double MINUTES_IN_DAY = 60 * 24;
+
+	private LocalDateTime entryDateTime;
+
+	private LocalDateTime exitDateTime;
 	
 	
 	
 	public ChargeCalculator(long entryDateTimeMillis, long exitDateTimeMillis) {
 		LocalDateTime entryDateTime = toLocalDateTime(entryDateTimeMillis);
-		LocalDateTime exitDateTime = toLocalDateTime(exitDateTimeMillis);	
+		LocalDateTime exitDateTime = toLocalDateTime(exitDateTimeMillis);
+		if (exitDateTime.isBefore(entryDateTime)) {
+			throw new RuntimeException("The exit date time must be after the entry date time.");
+		}
+		
+		this.entryDateTime = entryDateTime;
+		this.exitDateTime = exitDateTime;		
+	}
+	
+	
+	public double calcParkingCharge() {
+		LocalDate entryDate = this.entryDateTime.toLocalDate();
+		LocalDate exitDate = this.exitDateTime.toLocalDate();
+		LocalDate currentDate = entryDate;
+		LocalTime currentStartTime = this.entryDateTime.toLocalTime();
+		LocalTime currentEndTime = LocalTime.MIDNIGHT;
+		
+		double charge = 0;
+		while(!currentDate.equals(exitDate)) {
+			charge += calcDayCharge(currentStartTime, currentEndTime, currentDate.getDayOfWeek());
+			currentStartTime = currentEndTime;
+			currentDate = currentDate.plusDays(1);
+		}
+		
+		charge += calcDayCharge(currentStartTime, this.exitDateTime.toLocalTime(), currentDate.getDayOfWeek());
+		return charge;
 	}
 	
 	
@@ -99,10 +129,12 @@ public class ChargeCalculator {
 	}
 	
 	
+	
 	// Midnight is considered after a time.
 	private static boolean isTimeOnOrBefore(LocalTime first, LocalTime second) {
 		return first != LocalTime.MIDNIGHT && (first.equals(second) || first.isBefore(second));
 	}
+	
 	
 	
 	private static double calcChargeBetweenTimes(LocalTime startTime, LocalTime endTime, double charge) {
